@@ -67,7 +67,7 @@ func (e *Exporter) scrapeHandler(w http.ResponseWriter, r *http.Request) {
 				// 没有匹配到, 则使用默认兜底;
 				credential = e.options.CustomizedPasswordMap["default"]
 			}
-			if credential.Username != "" && credential.Password != "" {
+			if credential.Password != "" {
 				u.User = url.UserPassword(credential.Username, credential.Password)
 			}
 		}

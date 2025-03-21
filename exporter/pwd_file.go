@@ -57,9 +57,7 @@ func LoadCustomizedPwdFile(passwordFile string) (map[string]Credential, error) {
 	log.Infof("Loaded %d entries from %s", len(res), passwordFile)
 	for k := range res {
 		log.Debugf("%s", k)
-		if res[k].Username == "" {
-			return nil, fmt.Errorf("username of %s is empty", k)
-		}
+		// username can be empty
 		if res[k].Password == "" {
 			return nil, fmt.Errorf("password of %s is empty", k)
 		}
