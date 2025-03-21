@@ -135,9 +135,9 @@ func main() {
 		log.Fatalf("Couldn't parse connection timeout duration, err: %s", err)
 	}
 
-	passwordMap := make(map[string]string)
+	passwordMap := make(map[string]exporter.Credential)
 	if *redisPwd == "" && *redisPwdFile != "" {
-		passwordMap, err = exporter.LoadPwdFile(*redisPwdFile)
+		passwordMap, err = exporter.LoadCustomizedPwdFile(*redisPwdFile)
 		if err != nil {
 			log.Fatalf("Error loading redis passwords from file %s, err: %s", *redisPwdFile, err)
 		}
@@ -164,7 +164,8 @@ func main() {
 		exporter.Options{
 			User:                           *redisUser,
 			Password:                       *redisPwd,
-			PasswordMap:                    passwordMap,
+			PasswordMap:                    make(map[string]string),
+			CustomizedPasswordMap:          passwordMap,
 			Namespace:                      *namespace,
 			ConfigCommandName:              *configCommand,
 			CheckKeys:                      *checkKeys,

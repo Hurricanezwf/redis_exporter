@@ -57,8 +57,22 @@ func (e *Exporter) scrapeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// get rid of username/password info in "target" so users don't send them in plain text via http
-	u.User = nil
+	// BY Hurricanezwf: 从密码库中匹配密码;
+	password, _ := u.User.Password()
+	if u.User == nil || (u.User.Username() == "" && password == "") {
+		if e.options.CustomizedPasswordMap != nil {
+			// 默认使用 Host 匹配;
+			credential, ok := e.options.CustomizedPasswordMap[u.Host]
+			if !ok {
+				// 没有匹配到, 则使用默认兜底;
+				credential = e.options.CustomizedPasswordMap["default"]
+			}
+			if credential.Username != "" && credential.Password != "" {
+				u.User = url.UserPassword(credential.Username, credential.Password)
+			}
+		}
+	}
+
 	target = u.String()
 
 	opts := e.options
@@ -104,14 +118,14 @@ func (e *Exporter) reloadPwdFile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	log.Debugf("Reload redisPwdFile")
-	passwordMap, err := LoadPwdFile(e.options.RedisPwdFile)
+	passwordMap, err := LoadCustomizedPwdFile(e.options.RedisPwdFile)
 	if err != nil {
 		log.Errorf("Error reloading redis passwords from file %s, err: %s", e.options.RedisPwdFile, err)
 		http.Error(w, "failed to reload passwords file: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 	e.Lock()
-	e.options.PasswordMap = passwordMap
+	e.options.CustomizedPasswordMap = passwordMap
 	e.Unlock()
 	_, _ = w.Write([]byte(`ok`))
 }
