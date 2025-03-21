@@ -50,6 +50,7 @@ type Options struct {
 	Password                       string
 	Namespace                      string
 	PasswordMap                    map[string]string
+	CustomizedPasswordMap          map[string]Credential
 	ConfigCommandName              string
 	CheckKeys                      string
 	CheckSingleKeys                string
